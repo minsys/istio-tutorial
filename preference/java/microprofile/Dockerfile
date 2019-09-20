@@ -7,4 +7,4 @@ ENV JAEGER_SERVICE_NAME=preference\
   JAEGER_SAMPLER_TYPE=const\
   JAEGER_SAMPLER_PARAM=1
 EXPOSE 8080 8778 9779
-COPY target/preference-swarm.jar /deployments/
+COPY target/preference-thorntail.jar /deployments/

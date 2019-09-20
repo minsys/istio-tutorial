@@ -12,11 +12,13 @@ namespace dotnet.Controllers
     {
         const string url = "http://preference:8080";
         const string responseStringFormat = "customer => {0}\n";
+
         // GET api/values
         [HttpGet]
         public string Get()
         {
             string hostname = Dns.GetHostName();
+
             return String.Format(responseStringFormat, hostname);
         }
     }

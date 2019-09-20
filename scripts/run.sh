@@ -1,12 +1,5 @@
 #!/bin/bash
-
-url=$1
-if [ -z "$url" ]
-then
-    url="istio-ingressgateway-istio-system.$(minishift ip).nip.io/customer"
-fi
-
 while true
-do curl $url
+do curl customer-tutorial.$(minishift ip).nip.io
 sleep .5
 done

@@ -7,4 +7,4 @@ ENV JAEGER_SERVICE_NAME=customer\
   JAEGER_SAMPLER_TYPE=const\
   JAEGER_SAMPLER_PARAM=1
 EXPOSE 8080 8778 9779
-COPY target/customer-swarm.jar /deployments/
+COPY target/customer-thorntail.jar /deployments/

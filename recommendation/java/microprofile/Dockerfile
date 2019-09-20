@@ -7,4 +7,4 @@ ENV JAEGER_SERVICE_NAME=recommendation\
   JAEGER_SAMPLER_TYPE=const\
   JAEGER_SAMPLER_PARAM=1
 EXPOSE 8080 8778 9779
-COPY target/recommendation-swarm.jar /deployments/
+COPY target/recommendation-thorntail.jar /deployments/

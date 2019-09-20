@@ -20,17 +20,17 @@ spec:
       containers:
       - env:
         - name: JAVA_OPTIONS
-          value: -Xms15m -Xmx15m -Xmn15m
-        image: quay.io/rhdevelopers/istio-tutorial-recommendation:v3
+          value: -Xmx256m
+        image: example/recommendation:v3
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
             command:
             - curl
             - localhost:8080/health
-          initialDelaySeconds: 3
-          periodSeconds: 1
-          timeoutSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 10
         name: recommendation
         ports:
         - containerPort: 8080
@@ -47,8 +47,8 @@ spec:
             command:
             - curl
             - localhost:8080/health
-          initialDelaySeconds: 3
-          periodSeconds: 1
-          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 10
         securityContext:
           privileged: false

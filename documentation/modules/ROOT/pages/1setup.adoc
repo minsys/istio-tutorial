@@ -46,7 +46,7 @@ The output should be something like:
 ----
 ✔ minishift
 ✔ docker 18.09.0
-✔ oc
+✔ oc 22
 ✔ kubectl
 ✔ git 2.17.2
 ✔ mvn 3.5.0
@@ -63,7 +63,7 @@ You can check quickly if you are missing any tool and decide if you want to inst
 
 In case of using Minishift you need at least minishift v1.24.0.
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 #!/bin/bash
 
@@ -74,59 +74,208 @@ In case of using Minishift you need at least minishift v1.24.0.
 minishift profile set istio-tutorial
 minishift config set memory 8GB
 minishift config set cpus 3
+minishift config set vm-driver virtualbox ## or kvm, for Fedora
 minishift config set image-caching true
 minishift config set openshift-version v3.11.0
 minishift addon enable admin-user
-
-#cdk 3.7 bug - docker url check
-minishift config set skip-startup-checks true
+minishift addon enable anyuid
 
 minishift start
-#This needs to be executed again if you restart minishift.
 minishift ssh -- sudo setenforce 0
-
-# Openshift console bug. anyuid needs to be applied after startup
-minishift addon apply anyuid
 ----
-
 
 [#environment]
 == Setup environment
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 eval $(minishift oc-env)
+eval $(minishift docker-env)
 oc login $(minishift ip):8443 -u admin -p admin
 ----
 
 NOTE: In this tutorial, you will often be polling the customer endpoint with `curl`, while simultaneously viewing logs via `stern` or `kubetail.sh` and issuing commands via `oc` and `istioctl`. Consider using three terminal windows.
 
-[#upstreamistioinstallation]
-== Upstream Istio installation
+You have two options to install Istio in your environment.
+The option 1 is through the installation of https://docs.openshift.com/container-platform/3.10/servicemesh-install/servicemesh-install.html[Red Hat OpenShift Service Mesh], which includes Jaeger and Kiali in addition to Istio components.
+The option 2 is using the Istio source code from upstream community.
 
-[source,bash,subs="+macros,+attributes"]
+[#redhatistioinstallation]
+== (Option 1) Red Hat OpenShift Service Mesh installation
+
+The Red Hat OpenShift Service Mesh uses an operator to install all Istio components and to set all permissions. You also get Jaeger and Kaili pre-installed in the bundle.
+
+Before start, you have to enable mutating and validating admission webhook plugins
+
+[source,bash]
+----
+#!/bin/bash
+
+minishift openshift config set --target=kube --patch '{
+    "admissionConfig": {
+        "pluginConfig": {
+            "ValidatingAdmissionWebhook": {
+                "configuration": {
+                    "apiVersion": "apiserver.config.k8s.io/v1alpha1",
+                    "kind": "WebhookAdmission",
+                    "kubeConfigFile": "/dev/null"
+                }
+            },
+            "MutatingAdmissionWebhook": {
+                "configuration": {
+                    "apiVersion": "apiserver.config.k8s.io/v1alpha1",
+                    "kind": "WebhookAdmission",
+                    "kubeConfigFile": "/dev/null"
+                }
+            }
+        }
+    }
+}'
+----
+
+You also need to set the system limits on `mmap` counts otherwise Elasticsearch will fail.
+Jaeger uses Elasticsearch and it is part of the Red Hat OpenShift Service Mesh.
+Elasticsearch uses a `mmapfs` directory by default to store its indices.
+The default operating system limits on `mmap` counts is likely to be too low, which may result in out of memory exceptions.
+To fix this you have to login into the minishift instance and do the following
+
+[source,bash]
+----
+$ minishift ssh
+[docker@istio-tutorial ~]$ sudo -i
+[root@istio-tutorial ~]$ echo "vm.max_map_count = 262144" > /etc/sysctl.d/99-elasticsearch.conf
+[root@istio-tutorial ~]$ sysctl vm.max_map_count=262144
+[root@istio-tutorial ~]$ exit
+logout
+[docker@istio-tutorial ~]$ exit
+logout
+----
+
+Download the Istio release and add `istioctl` to your path so later in this tutorial you can use it to manually inject the sidecars.
+
+NOTE: Another option would be to add the annotation `sidecar.istio.io/inject: "true"` in the deployment files so the sidecar is injected automatically.
+
+[source,bash]
 ----
 #!/bin/bash
 
 # Mac OS:
-curl -L https://github.com/istio/istio/releases/download/1.1.9/istio-1.1.9-osx.tar.gz | tar xz
+curl -L https://github.com/istio/istio/releases/download/1.0.3/istio-1.0.3-osx.tar.gz | tar xz
 
 # Fedora/RHEL:
-curl -L https://github.com/istio/istio/releases/download/1.1.9/istio-1.1.9-linux.tar.gz | tar xz
+curl -L https://github.com/istio/istio/releases/download/1.0.3/istio-1.0.3-linux.tar.gz | tar xz
 
 # Both:
-cd istio-1.1.9
+pushd istio-1.0.3
+export ISTIO_HOME=`pwd`
+export PATH=$ISTIO_HOME/bin:$PATH
+popd
+
+----
+
+Now your system is prepared and we can install Istio operator
+
+[source,bash]
+----
+#!/bin/bash
+
+oc new-project istio-operator
+oc new-app -f https://raw.githubusercontent.com/Maistra/openshift-ansible/maistra-0.4/istio/istio_community_operator_template.yaml --param=OPENSHIFT_ISTIO_MASTER_PUBLIC_URL="https://$(minishift ip):8443"
+----
+
+Wait for the operator to be ready
+
+[source,bash]
+----
+$ oc get pods -w -n istio-operator
+
+NAME                              READY     STATUS    RESTARTS   AGE
+istio-operator-58c45d8f64-jdsrz   1/1       Running   0          10s
+----
+
+Once operator is ready, create an installation for Istio
+
+[source,bash]
+----
+#!/bin/bash
+oc project istio-operator
+cat <<EOF >>/tmp/istio-cr.yaml
+apiVersion: "istio.openshift.com/v1alpha1"
+kind: "Installation"
+metadata:
+  name: "istio-installation"
+spec:
+  deployment_type: origin
+  istio:
+    authentication: true
+    community: true
+    prefix: maistra/
+    version: 0.4.0
+  jaeger:
+    prefix: jaegertracing/
+    version: 1.7.0
+    elasticsearch_memory: 2Gi
+  kiali:
+    username: admin
+    password: admin
+    prefix: kiali/
+    version: v0.9.1
+EOF
+oc create -f /tmp/istio-cr.yaml
+----
+
+Wait for Istio's components to be ready
+
+[source,bash]
+----
+$ oc get pods -n istio-system
+
+NAME                                          READY     STATUS      RESTARTS   AGE
+elasticsearch-0                               1/1       Running     0          3m
+grafana-648c7d5cc6-d4cgr                      1/1       Running     0          3m
+istio-citadel-64f86c964-vjd6f                 1/1       Running     0          5m
+istio-egressgateway-8579f6f649-zwmqh          1/1       Running     0          5m
+istio-galley-569c79fcbf-rc24l                 1/1       Running     0          5m
+istio-ingressgateway-5457546784-gct2p         1/1       Running     0          5m
+istio-pilot-78d8f7465f-kmclw                  2/2       Running     0          5m
+istio-policy-b57648f9f-cvj82                  2/2       Running     0          5m
+istio-sidecar-injector-5876f696f-s2pdt        1/1       Running     0          5m
+istio-statsd-prom-bridge-549d687fd9-g2gmc     1/1       Running     0          5m
+istio-telemetry-56587b8fb6-wpg9k              2/2       Running     0          5m
+jaeger-agent-6qgrl                            1/1       Running     0          3m
+jaeger-collector-9cbd5f46c-kt9w9              1/1       Running     0          3m
+jaeger-query-6678967b5-8sgdp                  1/1       Running     0          3m
+kiali-6b8c686d9b-mkxdv                        1/1       Running     0          2m
+openshift-ansible-istio-installer-job-rj7pj   0/1       Completed   0          7m
+prometheus-6ffc56584f-zgbv8                   1/1       Running     0          5m
+----
+
+[#upstreamistioinstallation]
+== (Option 2) Upstream Istio installation
+
+[source,bash]
+----
+#!/bin/bash
+
+# Mac OS:
+curl -L https://github.com/istio/istio/releases/download/1.0.3/istio-1.0.3-osx.tar.gz | tar xz
+
+# Fedora/RHEL:
+curl -L https://github.com/istio/istio/releases/download/1.0.3/istio-1.0.3-linux.tar.gz | tar xz
+
+# Both:
+cd istio-1.0.3
 export ISTIO_HOME=`pwd`
 export PATH=$ISTIO_HOME/bin:$PATH
 
 ----
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 
-oc apply -f install/kubernetes/helm/istio-init/files/crd-11.yaml
+oc apply -f install/kubernetes/helm/istio/templates/crds.yaml
 or
-kubectl apply -f install/kubernetes/helm/istio-init/files/crd-11.yaml
+kubectl apply -f install/kubernetes/helm/istio/templates/crds.yaml
 
 
 oc apply -f install/kubernetes/istio-demo.yaml
@@ -137,47 +286,44 @@ oc project istio-system
 or
 kubectl config set-context $(kubectl config current-context) --namespace=istio-system
 
-oc expose svc istio-ingressgateway --port=80
+oc expose svc istio-ingressgateway
+oc expose svc servicegraph
 oc expose svc grafana
 oc expose svc prometheus
 oc expose svc tracing
-oc expose service kiali --path=/kiali 
-oc adm policy add-cluster-role-to-user admin system:serviceaccount:istio-system:kiali-service-account -z default
 ----
 
 Wait for Istio's components to be ready
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 $ oc get pods -w
 or
 $ kubectl get pods -w
 
 NAME                                        READY     STATUS      RESTARTS   AGE
-grafana-55cd86b44c-2vndc                  1/1     Running     0          88m
-istio-citadel-f9fbdd9df-xzzr7             1/1     Running     0          88m
-istio-cleanup-secrets-1.1.6-d5css         0/1     Completed   0          88m
-istio-egressgateway-895fb885d-bdqkv       1/1     Running     0          89m
-istio-galley-5797db85b8-4866m             1/1     Running     0          89m
-istio-grafana-post-install-1.1.6-6dk5h    0/1     Completed   0          89m
-istio-ingressgateway-58f959476f-82zsf     1/1     Running     0          89m
-istio-pilot-57d4bb58ff-tt8r4              2/2     Running     0          88m
-istio-policy-79b88bcdf9-qqp4r             2/2     Running     6          88m
-istio-security-post-install-1.1.6-8mmxj   0/1     Completed   0          88m
-istio-sidecar-injector-7698fc57fb-dlnx4   1/1     Running     0          88m
-istio-telemetry-b9799c89-d94hj            2/2     Running     6          88m
-istio-tracing-7454db9d79-9qwqr            1/1     Running     0          88m
-kiali-66d74fc6cc-zdzzt                    1/1     Running     0          88m
-prometheus-7d9fb4b69c-ww5w7               1/1     Running     0          88m
+grafana-6995b4fbd7-ntp4f                    1/1       Running     0          57m
+istio-citadel-54f4678f86-jnv5s              1/1       Running     0          57m
+istio-cleanup-secrets-nch4k                 0/1       Completed   0          57m
+istio-egressgateway-5d7f8fcc7b-r76gg        1/1       Running     0          57m
+istio-galley-7bd8b5f88f-nlczb               1/1       Running     0          57m
+istio-grafana-post-install-lffq2            0/1       Completed   0          57m
+istio-ingressgateway-6f58fdc8d7-gbzzq       1/1       Running     0          57m
+istio-pilot-d99689994-zh66q                 2/2       Running     0          57m
+istio-policy-766bf4bd6d-skwkp               2/2       Running     0          57m
+istio-sidecar-injector-85ccf84984-crmhv     1/1       Running     0          57m
+istio-statsd-prom-bridge-55965ff9c8-76nx4   1/1       Running     0          57m
+istio-telemetry-55b6b5bbc7-qmf2l            2/2       Running     0          57m
+istio-tracing-77f9f94b98-kknh7              1/1       Running     0          57m
+prometheus-7456f56c96-nxdvv                 1/1       Running     0          57m
+servicegraph-684c85ffb9-f7tjp               1/1       Running     2          57m
 ----
 
 And if you need quick access to the OpenShift console
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 minishift console
 ----
 
 NOTE: On your first launch of the OpenShift console via `minishift`, you will receive a warning like "Your connection is not private". For our demo, simply select "Proceed to 192.168.xx.xx (unsafe)" to bypass the warning. Both the username and the password are set to `admin`, thanks to the `admin-user` add-on.
-
-

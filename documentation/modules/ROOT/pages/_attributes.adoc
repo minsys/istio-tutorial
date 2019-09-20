@@ -1,10 +1,11 @@
 :moduledir: ..
+include::{moduledir}/_attributes.adoc[]
 :branch: master
 :github-repo: https://github.com/redhat-developer-demos/istio-tutorial/blob/{branch}
 :customer-repo: customer
-:customer-java: java/quarkus
+:customer-java: java/springboot
 :preference-repo: preference
-:preference-java: java/quarkus
+:preference-java: java/springboot
 :recommendation-repo: recommendation
-:recommendation-java: java/quarkus
+:recommendation-java: java/vertx
 :istiofiles-dir: istiofiles

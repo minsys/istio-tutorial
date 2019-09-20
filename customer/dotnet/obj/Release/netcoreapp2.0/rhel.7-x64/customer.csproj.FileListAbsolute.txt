@@ -1,0 +1,14 @@
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer.deps.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer.runtimeconfig.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer.runtimeconfig.dev.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer.dll
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer.pdb
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.csprojAssemblyReference.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.csproj.CoreCompileInputs.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.AssemblyInfoInputs.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.AssemblyInfo.cs
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.dll
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\obj\Release\netcoreapp2.0\rhel.7-x64\customer.pdb
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\libhostpolicy.so
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\libhostfxr.so
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\customer\dotnet\bin\Release\netcoreapp2.0\rhel.7-x64\customer

@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.redhat.developer.demos</groupId>
     <artifactId>recommendation</artifactId>
-    <name>WildFly Swarm Example</name>
+    <name>Thorntail Example</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
-        <version.wildfly.swarm>2018.4.1</version.wildfly.swarm>
+        <version.thorntail>2.5.0.Final</version.thorntail>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -19,9 +19,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wildfly.swarm</groupId>
-                <artifactId>bom-all</artifactId>
-                <version>${version.wildfly.swarm}</version>
+                <groupId>io.thorntail</groupId>
+                <artifactId>bom</artifactId>
+                <version>${version.thorntail}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -32,9 +32,9 @@
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
-                <groupId>org.wildfly.swarm</groupId>
-                <artifactId>wildfly-swarm-plugin</artifactId>
-                <version>${version.wildfly.swarm}</version>
+                <groupId>io.thorntail</groupId>
+                <artifactId>thorntail-maven-plugin</artifactId>
+                <version>${version.thorntail}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -47,31 +47,40 @@
     </build>
 
     <dependencies>
-        <!-- Java EE 7 dependency -->
+        <!-- https://mvnrepository.com/artifact/org.eclipse.microprofile/microprofile -->
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
+            <groupId>io.thorntail</groupId>
+            <artifactId>microprofile</artifactId>
+            <version>${version.thorntail}</version>
+            <type>pom</type>
             <scope>provided</scope>
         </dependency>
-        <!-- WildFly Swarm Fractions -->
+
         <dependency>
-            <groupId>org.wildfly.swarm</groupId>
-            <artifactId>microprofile-health</artifactId>
+            <groupId>io.thorntail</groupId>
+            <artifactId>microprofile-openapi</artifactId>
+            <version>${version.thorntail}</version>
         </dependency>
+
         <dependency>
-            <groupId>org.wildfly.swarm</groupId>
-            <artifactId>microprofile</artifactId>
+            <groupId>org.microprofile-ext.openapi-ext</groupId>
+            <artifactId>swagger-ui</artifactId>
+            <version>1.0.2</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
         <dependency>
-            <groupId>org.wildfly.swarm</groupId>
-            <artifactId>microprofile-config</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.28</version>
+            <scope>test</scope>
         </dependency>
-        <!-- Tracing -->
+
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
         <dependency>
-            <groupId>com.uber.jaeger</groupId>
-            <artifactId>jaeger-tracerresolver</artifactId>
-            <version>0.25.0</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.28</version>
         </dependency>
     </dependencies>
 </project>

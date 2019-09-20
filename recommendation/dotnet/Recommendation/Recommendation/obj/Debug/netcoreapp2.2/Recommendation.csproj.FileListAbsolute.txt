@@ -1,0 +1,14 @@
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\bin\Debug\netcoreapp2.2\Recommendation.deps.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\bin\Debug\netcoreapp2.2\Recommendation.runtimeconfig.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\bin\Debug\netcoreapp2.2\Recommendation.runtimeconfig.dev.json
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\bin\Debug\netcoreapp2.2\Recommendation.dll
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\bin\Debug\netcoreapp2.2\Recommendation.pdb
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.csprojAssemblyReference.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.csproj.CoreCompileInputs.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.RazorAssemblyInfo.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.RazorAssemblyInfo.cs
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.AssemblyInfoInputs.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.AssemblyInfo.cs
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.RazorTargetAssemblyInfo.cache
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.dll
+C:\Users\Hugo\Documents\Code\Java\istio-tutorial\recommendation\dotnet\Recommendation\Recommendation\obj\Debug\netcoreapp2.2\Recommendation.pdb

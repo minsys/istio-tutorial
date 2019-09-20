@@ -4,7 +4,7 @@ include::_attributes.adoc[]
 [IMPORTANT]
 .Before Start
 ====
-You should have NO virtualservice, destinationrule, gateway or policy (in `tutorial` namespace) `kubectl get virtualservice` `kubectl get destinationrule` `kubectl get gateway` `kubectl get policy`
+You should have NO virtualservice, destinationrule, gateway or policy (in `tutorial` namespace) `istioctl get virtualservice` `istioctl get destinationrule` `istioctl get gateway` `istioctl get policy`
 if so run:
 
 [source, bash]
@@ -34,47 +34,6 @@ So let's see how to implement this approach using Istio.
 [#deploy-recommendation-v3]
 == Create recommendation:v3
 
-[IMPORTANT]
-=====
-You need to be sure that you do not have a _recommendation:v3_ deployed in the cluster and that _recommendation_ code base is correct.
-
-[source, bash]
-----
-oc get pods
-or
-kubectl get pods
-
-NAME                                  READY     STATUS    RESTARTS   AGE
-customer-3600192384-fpljb             2/2       Running   0          17m
-preference-243057078-8c5hz           2/2       Running   0          15m
-recommendation-v1-60483540-9snd9     2/2       Running   0          12m
-recommendation-v2-2815683430-vpx4p   2/2       Running   0         15s
-----
-
-To check if _recommendation_ source code is correct check that `getNow` method is not active.
-
-[source, java]
-.recommendation/java/vertx/src/main/java/com/redhat/developer/demos/recommendation/RecommendationVerticle.java
-----
-        router.get("/").handler(this::getRecommendations);
-//        router.get("/").handler(this::getNow);
-----
-
-You might have a _recommendation:v3_ deployed because of you did xref:ROOT:8egress.adoc[Egress Section] ad not cleaned up the resources.
-
-If it is the case you can follow the xref:ROOT:8egress.adoc#cleanup[Egress Clean Up Section].
-
-If it is not the case then run:
-
-[source, bash]
-----
-oc delete all -l app=recommendation,version=v3
-or
-kubectl delete all -l app=recommendation,version=v3
-----
-
-=====
-
 We can experiment with Istio controlling traffic by making a change to `RecommendationVerticle.java` like the following and creating a "v3" docker image.
 
 [source,java]
@@ -88,7 +47,7 @@ There is also a second `deployment.yml` file to label things correctly
 
 === Docker build (if you have access to Docker daemon)
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 cd recommendation/java/vertx
 mvn clean package
@@ -105,12 +64,12 @@ IMPORTANT: We have a 3rd Deployment to manage the v3 version of recommendation.
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment-v3.yml[../../kubernetes/Deployment-v3.yml]) -n tutorial
+oc apply -f <(istioctl kube-inject -f link:{github-repo}/{preference-repo}/kubernetes/Deployment-v3.yml[../../kubernetes/Deployment-v3.yml]) -n tutorial
 oc get pods -w -n tutorial
 
 or
 
-kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment-v3.yml[../../kubernetes/Deployment-v3.yml]) -n tutorial
+kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{preference-repo}/kubernetes/Deployment-v3.yml[../../kubernetes/Deployment-v3.yml]) -n tutorial
 kubectl get pods -w -n tutorial
 ----
 
@@ -130,7 +89,7 @@ oc start-build recommendation-v3 --from-dir=. --follow -n tutorial
 
 Wait for those pods to show "2/2", the istio-proxy/envoy sidecar is part of that pod.
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                  READY     STATUS    RESTARTS   AGE
 customer-3600192384-fpljb             2/2       Running   0          17m
@@ -142,7 +101,7 @@ recommendation-v3-9834632434-urd34   2/2       Running   0         15s
 
 and test the customer endpoint until you can see that v3 has been reached.
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 curl customer-tutorial.$(minishift ip).nip.io
 ----

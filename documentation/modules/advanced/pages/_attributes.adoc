@@ -1,4 +1,5 @@
 :moduledir: ..
+include::{moduledir}/_attributes.adoc[]
 :branch: master
 :github-repo: https://github.com/redhat-developer-demos/istio-tutorial/blob/{branch}
 :customer-repo: customer
@@ -8,4 +9,3 @@
 :recommendation-repo: recommendation
 :recommendation-java: java/vertx
 :istiofiles-dir: istiofiles
-:diferencia-dir: diferencia

@@ -16,16 +16,22 @@ spec:
       labels:
         app: customer
         version: v1
-      annotations:
-        sidecar.istio.io/inject: "true"
     spec:
       containers:
       - env:
         - name: JAVA_OPTIONS
-          value: -Xms15m -Xmx15m -Xmn15m
-        name: customer
-        image: quay.io/rhdevelopers/istio-tutorial-customer:v1
+          value: -Xms128m -Xmx256m -Djava.net.preferIPv4Stack=true -Djava.security.egd=file:///dev/./urandom
+        image: example/customer:latest
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:8080/health
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 1
+        name: customer
         ports:
         - containerPort: 8080
           name: http
@@ -36,21 +42,13 @@ spec:
         - containerPort: 9779
           name: prometheus
           protocol: TCP
-        livenessProbe:
-          exec:
-            command:
-            - curl
-            - localhost:8080/health          
-          initialDelaySeconds: 3
-          periodSeconds: 5
-          timeoutSeconds: 5
         readinessProbe:
           exec:
             command:
             - curl
-            - localhost:8080/health          
-          initialDelaySeconds: 3
+            - localhost:8080/health
+          initialDelaySeconds: 10
           periodSeconds: 5
-          timeoutSeconds: 5
+          timeoutSeconds: 1
         securityContext:
           privileged: false

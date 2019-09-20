@@ -4,7 +4,7 @@ include::_attributes.adoc[]
 [IMPORTANT]
 .Before Start
 ====
-You should have NO virtualservice nor destinationrule (in `tutorial` namespace) `kubectl get virtualservice` `kubectl get destinationrule` 
+You should have NO virtualservice nor destinationrule (in `tutorial` namespace) `istioctl get virtualservice` `istioctl get destinationrule` 
 if so run:
 
 [source, bash]
@@ -191,7 +191,7 @@ In this way when you deploy a new service, you can mirror the traffic without wo
 [#cleanup]
 == Clean up
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 istioctl delete -f istiofiles/destination-rule-recommendation-v1.yml -n tutorial
 istioctl delete -f istiofiles/virtual-service-recommendation-virtualized.yml -n tutorial
